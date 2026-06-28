@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+    <meta
+        name="description"
+        content="CPU Scheduling Calculator — Simulate FCFS, SJF, and Round Robin scheduling algorithms with interactive Gantt charts."
+    >
+    <title>CPU Scheduling Calculator</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+        rel="stylesheet"
+    >
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/style.css') }}"
+    >
+</head>
+
+<body class="dark">
+
+    <!-- Background Glow Effects -->
+    <div class="bg-glow bg-glow-1"></div>
+    <div class="bg-glow bg-glow-2"></div>
+
+    <div class="app-layout" id="app-layout">
+
+        <!-- ==================== SIDEBAR ==================== -->
+        <aside class="sidebar" id="sidebar">
+
+            <!-- Logo / App Header -->
+            <header class="sidebar-header">
+                <div class="logo-icon">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="4" y="4" width="16" height="16" rx="2"/>
+                        <rect x="9" y="9" width="6" height="6"/>
+                        <path d="M15 2v2"/><path d="M15 20v2"/>
+                        <path d="M2 15h2"/><path d="M20 15h2"/>
+                        <path d="M9 2v2"/><path d="M9 20v2"/>
+                        <path d="M2 9h2"/><path d="M20 9h2"/>
+                    </svg>
+                </div>
+                <div class="logo-text">
+                    <h1>CPU Scheduler</h1>
+                    <span class="logo-subtitle">Operating System Simulator</span>
+                </div>
+            </header>
+
+            <!-- Process Input Section -->
+            <section class="sidebar-section" id="process-section">
+                <div class="section-title">
+                    <span class="section-icon">📋</span>
+                    <h3>Process Table</h3>
+                </div>
+
+                <div class="process-generator">
+                    <label for="process-count">Number of Processes</label>
+                    <div class="input-row">
+                        <input
+                            type="number"
+                            id="process-count"
+                            min="1"
+                            max="20"
+                            placeholder="e.g. 3"
+                        >
+                        <button
+                            id="generate-btn"
+                            type="button"
+                            class="btn btn-secondary"
+                        >
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 5v14M5 12h14"/>
+                            </svg>
+                            Generate
+                        </button>
+                    </div>
+                </div>
+
+                <div class="process-table-wrapper">
+                    <table
+                        class="process-table"
+                        id="process-table"
+                    >
+                        <thead>
+                            <tr>
+                                <th class="th-color"></th>
+                                <th>PID</th>
+                                <th>Arrival</th>
+                                <th>Burst</th>
+                                <th class="th-action"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="process-body">
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Algorithm Section -->
+            <section class="sidebar-section" id="algorithm-section">
+                <div class="section-title">
+                    <span class="section-icon">⚙️</span>
+                    <h3>Algorithm</h3>
+                </div>
+
+                <div class="form-group">
+                    <label for="algorithm">Scheduling Algorithm</label>
+                    <div class="select-wrapper">
+                        <select id="algorithm" name="algorithm">
+                            <option value="fcfs">
+                                First Come First Serve (FCFS)
+                            </option>
+                            <option value="sjf_np">
+                                Shortest Job First — Non Preemptive
+                            </option>
+                            <option value="sjf_p">
+                                Shortest Job First — Preemptive
+                            </option>
+                            <option value="rr_fcfs">
+                                Round Robin — FCFS
+                            </option>
+                            <option value="rr_sjf_np">
+                                Round Robin — SJF Non Preemptive
+                            </option>
+                            <option value="rr_sjf_p">
+                                Round Robin — SJF Preemptive
+                            </option>
+                        </select>
+                        <svg class="select-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="6 9 12 15 18 9"/>
+                        </svg>
+                    </div>
+                </div>
+
+                <label class="checkbox-wrapper" for="compare-all">
+                    <input
+                        type="checkbox"
+                        id="compare-all"
+                    >
+                    <span class="checkmark"></span>
+                    <span>Compare All Algorithms</span>
+                </label>
+
+                <div
+                    id="quantum-group"
+                    class="form-group hidden"
+                >
+                    <label for="quantum">Quantum Time</label>
+                    <input
+                        type="number"
+                        id="quantum"
+                        min="1"
+                        placeholder="e.g. 2"
+                        class="input-full"
+                    >
+                </div>
+            </section>
+
+            <!-- Actions Section -->
+            <section class="sidebar-section sidebar-actions" id="action-section">
+                <div
+                    class="message-box"
+                    id="message-box"
+                ></div>
+
+                <button
+                    type="button"
+                    id="calculate-btn"
+                    class="btn btn-primary btn-lg"
+                >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="5 3 19 12 5 21 5 3"/>
+                    </svg>
+                    Calculate
+                </button>
+
+                <button
+                    type="button"
+                    id="clear-btn"
+                    class="btn btn-ghost"
+                >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="3 6 5 6 21 6"/>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                    </svg>
+                    Clear All
+                </button>
+            </section>
+
+            <!-- Theme Toggle -->
+            <div class="theme-bar">
+                <button
+                    type="button"
+                    id="theme-toggle-btn"
+                    class="theme-toggle-btn"
+                    aria-label="Toggle theme"
+                >
+                    <span class="theme-icon theme-icon-sun">☀️</span>
+                    <span class="theme-icon theme-icon-moon">🌙</span>
+                    <span class="theme-slider-dot"></span>
+                </button>
+            </div>
+
+        </aside>
+
+        <!-- ==================== MAIN CONTENT ==================== -->
+        <main class="main-content" id="main-content">
+
+            <!-- Empty State -->
+            <div class="empty-state" id="empty-state">
+                <div class="empty-icon">
+                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="4" y="4" width="16" height="16" rx="2"/>
+                        <rect x="9" y="9" width="6" height="6"/>
+                        <path d="M15 2v2"/><path d="M15 20v2"/>
+                        <path d="M2 15h2"/><path d="M20 15h2"/>
+                        <path d="M9 2v2"/><path d="M9 20v2"/>
+                        <path d="M2 9h2"/><path d="M20 9h2"/>
+                    </svg>
+                </div>
+                <h2>Ready to Simulate</h2>
+                <p>Add processes, pick an algorithm, and hit <strong>Calculate</strong> to visualize CPU scheduling.</p>
+            </div>
+
+            <!-- Compare Summary -->
+            <section
+                class="compare-summary"
+                id="compare-summary"
+            ></section>
+
+            <!-- Result Container -->
+            <section
+                class="result-container"
+                id="result-container"
+            ></section>
+
+        </main>
+    </div>
+
+    <script
+        src="{{ url_for('static', filename='js/script.js') }}"
+    ></script>
+</body>
+</html>
